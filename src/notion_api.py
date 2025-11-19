@@ -10,13 +10,37 @@ class NotionAPI:
         try:
             results = self.client.search(query=database_name, filter={
                 "property": "object",
-                "value": "database"
+                "value": "data_source"
             }).get("results")
+            
             if not results:
-                raise NotionAPIError(f"Database '{database_name}' not found.")
+                raise NotionAPIError(f"Database (Data Source) '{database_name}' not found.")
             return results[0]["id"]
         except Exception as e:
             raise NotionAPIError(f"Error finding database: {e}")
+
+    def get_data_source_id_from_database_id(self, database_id: str) -> str:
+        try:
+            db = self.client.databases.retrieve(database_id)
+            if "data_sources" in db and db["data_sources"]:
+                return db["data_sources"][0]["id"]
+            
+            try:
+                ds = self.client.data_sources.retrieve(database_id)
+                return ds["id"]
+            except:
+                pass
+
+            raise NotionAPIError(f"Could not find data source for ID: {database_id}")
+        except Exception as e:
+             try:
+                 ds = self.client.data_sources.retrieve(database_id)
+                 return ds["id"]
+             except:
+                 raise NotionAPIError(f"Error resolving data source ID from {database_id}: {e}")
+
+    def find_data_source_id_by_url_id(self, url_id: str) -> str:
+        return self.get_data_source_id_from_database_id(url_id)
 
     def get_empty_pages(self, database_id: str) -> list:
         empty_page_filter = {
@@ -64,7 +88,7 @@ class NotionAPI:
             }
         }
         try:
-            return self.client.databases.query(database_id=database_id, **empty_page_filter).get("results")
+            return self.client.data_sources.query(data_source_id=database_id, **empty_page_filter).get("results")
         except Exception as e:
             raise NotionAPIError(f"Error getting empty pages: {e}")
 
@@ -86,5 +110,5 @@ class NotionAPI:
         if result:
             result = result.group(1)
             if len(result) == 32:
-                return result
+                return f"{result[:8]}-{result[8:12]}-{result[12:16]}-{result[16:20]}-{result[20:]}"
         return None

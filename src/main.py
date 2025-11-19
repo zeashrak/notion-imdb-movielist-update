@@ -14,9 +14,13 @@ logger = get_logger(__name__)
 def _get_database_id(notion_api: NotionAPI) -> str | None:
     """Gets the database ID from the URL or by searching the database name."""
     if config.NOTION_DATABASE_URL:
-        database_id = notion_api.get_database_id_from_url(config.NOTION_DATABASE_URL)
-        if database_id:
-            return database_id
+        url_id = notion_api.get_database_id_from_url(config.NOTION_DATABASE_URL)
+        if url_id:
+            try:
+                return notion_api.get_data_source_id_from_database_id(url_id)
+            except NotionAPIError as e:
+                logger.warning(f"Failed to resolve data source ID from URL ID: {e}")
+                return url_id
     
     if config.NOTION_DATABASE_NAME:
         return notion_api.find_database_id(config.NOTION_DATABASE_NAME)
