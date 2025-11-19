@@ -9,7 +9,9 @@ sequenceDiagram
     participant NotionAPI
     participant IMDbAdapter
 
-    Main->>NotionAPI: get_empty_pages(db_id)
+    Main->>NotionAPI: get_data_source_id_from_database_id(db_id)
+    NotionAPI-->>Main: Returns data_source_id
+    Main->>NotionAPI: get_empty_pages(data_source_id)
     NotionAPI-->>Main: Returns list of pages
     loop For each page
         Main->>Updater: update_page(page)

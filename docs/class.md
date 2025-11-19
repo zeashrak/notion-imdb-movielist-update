@@ -16,6 +16,7 @@ classDiagram
         +get_empty_pages(database_id: str) list
         +update_page(page_id: str, properties: dict)
         +find_database_id(name: str) str
+        +get_data_source_id_from_database_id(database_id: str) str
     }
 
     class IMDbAdapter {
