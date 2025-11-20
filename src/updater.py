@@ -46,8 +46,14 @@ class Updater:
             "Title": {"title": [{"text": {"content": movie.title}}]},
             "IMDB": {"url": f"https://www.imdb.com/title/tt{movie.imdb_id}"},
         }
-        if movie.director and not movie.is_series:
-            properties["Director"] = {"select": {"name": movie.director}}
+        
+        director = "N/A"
+        if movie.director:
+            director = movie.director
+        elif movie.creators:
+            director = movie.creators[0]
+            
+        properties["Director/Creator"] = {"select": {"name": director}}
         if movie.duration:
             properties["Duration [min]"] = {"number": movie.duration}
         if movie.rating:

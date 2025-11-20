@@ -11,3 +11,4 @@ class Movie:
     rating: Optional[float] = None
     plot: Optional[str] = None
     genres: Optional[List[str]] = None
+    creators: Optional[List[str]] = None

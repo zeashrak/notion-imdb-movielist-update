@@ -71,7 +71,7 @@ class NotionAPI:
                                 }
                             },
                             {
-                                "property": "Director",
+                                "property": "Director/Creator",
                                 "select": {
                                     "is_empty": True
                                 }

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from imdbinfo import get_movie as get_imdb_movie_from_lib, search_title
 from imdb_adapter import IMDbAdapter
 from movie import Movie
@@ -50,6 +50,11 @@ class IMDbInfoAdapter(IMDbAdapter):
             return movie_from_lib.directors[0].name
         return None
 
+    def _get_creators(self, movie_from_lib: any) -> Optional[List[str]]:
+        if hasattr(movie_from_lib, 'info_series') and movie_from_lib.info_series and movie_from_lib.info_series.creators:
+            return [creator.name for creator in movie_from_lib.info_series.creators]
+        return None
+
     def _create_movie_from_imdb_movie(self, movie_from_lib: any) -> Movie:
         return Movie(
             title=movie_from_lib.title,
@@ -60,4 +65,5 @@ class IMDbInfoAdapter(IMDbAdapter):
             rating=movie_from_lib.rating,
             plot=movie_from_lib.plot,
             genres=movie_from_lib.genres,
+            creators=self._get_creators(movie_from_lib)
         )
