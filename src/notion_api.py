@@ -1,10 +1,29 @@
 import re
 from notion_client import Client
 from exceptions import NotionAPIError
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 class NotionAPI:
     def __init__(self, notion_token: str):
         self.client = Client(auth=notion_token)
+
+    def get_data_source_properties(self, data_source_id: str) -> dict:
+        try:
+            ds = self.client.data_sources.retrieve(data_source_id)
+            return ds.get("properties", {})
+        except Exception as e:
+            logger.warning(f"Failed to retrieve data source properties: {e}")
+            raise NotionAPIError(f"Failed to retrieve data source properties: {e}")
+
+    def update_data_source_properties(self, data_source_id: str, properties: dict):
+        try:
+            self.client.data_sources.update(data_source_id=data_source_id, properties=properties)
+        except Exception as e:
+            logger.warning(f"Failed to update data source properties: {e}")
+            raise NotionAPIError(f"Failed to update data source properties: {e}")
+
 
     def find_database_id(self, database_name: str) -> str:
         try:
@@ -42,49 +61,59 @@ class NotionAPI:
     def find_data_source_id_by_url_id(self, url_id: str) -> str:
         return self.get_data_source_id_from_database_id(url_id)
 
-    def get_empty_pages(self, database_id: str) -> list:
-        empty_page_filter = {
-            "filter": {
-                "and": [
+    def get_empty_pages(self, database_id: str, available_properties: list = None) -> list:
+        and_filters = [
+            {
+                "or": [
                     {
-                        "or": [
-                            {
-                                "property": "Title",
-                                "title": {
-                                    "is_not_empty": True
-                                }
-                            },
-                            {
-                                "property": "IMDB",
-                                "url": {
-                                    "is_not_empty": True
-                                }
-                            }
-                        ]
+                        "property": "Title",
+                        "title": {
+                            "is_not_empty": True
+                        }
                     },
                     {
-                        "or": [
-                            {
-                                "property": "Duration [min]",
-                                "number": {
-                                    "is_empty": True
-                                }
-                            },
-                            {
-                                "property": "Director/Creator",
-                                "select": {
-                                    "is_empty": True
-                                }
-                            },
-                            {
-                                "property": "IMDB",
-                                "url": {
-                                    "is_empty": True
-                                }
-                            }
-                        ]
+                        "property": "IMDB",
+                        "url": {
+                            "is_not_empty": True
+                        }
                     }
                 ]
+            },
+            {
+                "or": [
+                    {
+                        "property": "Duration [min]",
+                        "number": {
+                            "is_empty": True
+                        }
+                    },
+                    {
+                        "property": "Director/Creator",
+                        "select": {
+                            "is_empty": True
+                        }
+                    },
+                    {
+                        "property": "IMDB",
+                        "url": {
+                            "is_empty": True
+                        }
+                    }
+                ]
+            }
+        ]
+
+        if available_properties and "Sync Status" in available_properties:
+            and_filters.insert(0, {
+                "property": "Sync Status",
+                "select": {
+                    "is_empty": True
+                }
+            })
+
+        empty_page_filter = {
+            "filter": {
+                "and": and_filters
             }
         }
         try:
