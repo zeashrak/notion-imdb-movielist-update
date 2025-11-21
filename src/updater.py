@@ -13,15 +13,24 @@ class Updater:
         self._notion_api = notion_api
         self._imdb_adapter = imdb_adapter
 
-    def update_page(self, page: NotionPage):
+    def update_page(self, page: NotionPage, available_properties: list = None):
         try:
             logger.info(f"Updating the movie: {page.title}")
             movie = self._get_movie_from_page(page)
             properties = self._create_notion_properties(movie)
+            
+            if available_properties and "Sync Status" in available_properties:
+                properties["Sync Status"] = {"select": {"name": "Updated"}}
+                
             self._notion_api.update_page(page.id, properties)
             logger.info(f"Successfully updated {movie.title}")
         except MovieNotFound as e:
             logger.error(f"Failed to update {page.title}: {e}")
+            if available_properties and "Sync Status" in available_properties:
+                try:
+                    self._notion_api.update_page(page.id, {"Sync Status": {"select": {"name": "Not Found"}}})
+                except Exception as update_error:
+                    logger.error(f"Failed to update status to 'Not Found' for {page.title}: {update_error}")
 
     def _get_movie_from_page(self, page: NotionPage) -> Movie:
         if page.imdb_url:
