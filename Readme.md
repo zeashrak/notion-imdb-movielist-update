@@ -24,7 +24,7 @@ Go to https://www.notion.so/my-integrations page and create an internal integrat
 
 You have two options for setting up your database:
 
-1.  **Duplicate the Template**: Duplicate this page (https://www.notion.so/tuzumkuru/2b2785caecea81ceb253e2fd46d1afe7) to your workspace. This template includes some pre-configured views and properties.
+1.  **Duplicate the Template**: Duplicate this page (https://tuzumkuru.notion.site/2b2785caecea81ceb253e2fd46d1afe7) to your workspace. This template includes some pre-configured views and properties.
 2.  **Use Your Own Database**: You can create a new empty database or use an existing one. The script includes a **Schema Manager** that will automatically detect missing properties (like 'Director/Creator', 'Sync Status', 'IMDB Rating') and create them for you. This gives you the flexibility to design your database with your own custom properties and views.
 
 **Important**: Connect your integration to your page. Click on the `...` on the top right corner of your page, hover on `Add Connections`, and select the integration you created. 
