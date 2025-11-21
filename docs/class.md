@@ -7,16 +7,23 @@ classDiagram
     class Updater {
         -notion_api: NotionAPI
         -imdb_adapter: IMDbAdapter
-        +update_page(page: NotionPage)
+        +update_page(page: NotionPage, available_properties: list)
         -_get_movie_from_page(page: NotionPage) Movie
         -_create_notion_properties(movie: Movie) dict
     }
 
+    class SchemaManager {
+        -notion_api: NotionAPI
+        +ensure_schema(data_source_id: str, required_schema: dict) list
+    }
+
     class NotionAPI {
-        +get_empty_pages(database_id: str) list
+        +get_empty_pages(database_id: str, available_properties: list) list
         +update_page(page_id: str, properties: dict)
         +find_database_id(name: str) str
         +get_data_source_id_from_database_id(database_id: str) str
+        +get_data_source_properties(data_source_id: str) dict
+        +update_data_source_properties(data_source_id: str, properties: dict)
     }
 
     class IMDbAdapter {
@@ -35,6 +42,7 @@ classDiagram
         title: str
         imdb_id: str
         director: str
+        creators: list
         rating: float
         ...
     }
@@ -48,6 +56,7 @@ classDiagram
 
     Updater o-- NotionAPI
     Updater o-- IMDbAdapter
+    SchemaManager o-- NotionAPI
     IMDbInfoAdapter --|> IMDbAdapter
     Updater ..> Movie : uses
     Updater ..> NotionPage : uses

@@ -91,10 +91,16 @@ After finishing the installation steps you can run the script with the following
 python src/main.py
 ```
 
-The script will search your Notion database for pages where the 'Director' or 'Duration [min]' properties are empty. For each of these pages, it will:
-1.  Attempt to find the movie on IMDb using the 'IMDB' URL property if it exists.
-2.  If no IMDb URL is present, it will search IMDb by the movie's 'Title'.
-3.  Once found, it will populate the empty properties in your Notion page with the information from IMDb, such as director, duration, rating, plot, and genres.
+The script will:
+1.  **Check and Update Schema**: Automatically ensure your Notion database has the required columns (e.g., "Sync Status", "Director/Creator"). It will create them if they are missing.
+2.  **Search for Empty Pages**: Look for pages where 'Director/Creator' or 'Duration [min]' are empty and 'Sync Status' is not 'Updated' or 'Not Found'.
+3.  **Fetch Data**:
+    *   Attempt to find the movie on IMDb using the 'IMDB' URL property if it exists.
+    *   If no IMDb URL is present, it will search IMDb by the movie's 'Title'.
+4.  **Update Notion**:
+    *   Populate the empty properties with information from IMDb (director/creator, duration, rating, plot, genres).
+    *   Set 'Sync Status' to **'Updated'** on success.
+    *   Set 'Sync Status' to **'Not Found'** if the movie cannot be found, preventing future retries for that item.
 
 You can create recurring tasks to run the script in a determined interval. 
 
